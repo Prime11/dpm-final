@@ -108,7 +108,8 @@ public class Startup {
 
 		LCDInfo lcd = new LCDInfo(odometer);
 
-		ObjectDetection detect = new ObjectDetection(detectionLS, us);
+		//new object detection class to fit our robot
+		Detection detect = new Detection(detectionLS);
 
 		// initiate the localization object and perform the localization.
 		//USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
