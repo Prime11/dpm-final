@@ -53,7 +53,7 @@ public class USLocalizer {
 	public void doLocalization() {
 		double[] pos = new double[3];
 		int filterCount = 0;
-		int filterMax = 2; // may vary with battery life apparently
+		int filterMax = 3; // may vary with battery life apparently
 		double initAngle = 0;
 		double angleA = 0, angleB = 0;
 		double gammaA = 0;

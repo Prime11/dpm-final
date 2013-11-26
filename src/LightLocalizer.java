@@ -105,7 +105,7 @@ public class LightLocalizer {
 		theta = -theta + odo.getAng();
 
 		//IF BATTERIES ARE TOO LOW THE Y-VALUE HAS TO BE NEGATIVE...OTHERWISE POSITIVE - CHECKLIST
-		double[] pos = { x, y, -theta };
+		double[] pos = { x, -y, theta};
 		boolean[] poop = { true, true, true };
 
 		this.odo.setPosition(pos, poop);
@@ -113,7 +113,7 @@ public class LightLocalizer {
 		// ADDED CODE STARTS HERE - IF IT DOESN'T WORK REMOVE THIS.
 		// travel to the negative values of x and y to get to the actual origin
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -135,14 +135,17 @@ public class LightLocalizer {
 		Sound.buzz();
 	
 
+		boolean right = false, left = false;
 		int i = 0;
 		while (i != 2) {
-			if (this.ls.getNormalizedLightValue() < 420) {
-				this.robot.getLeftMotor().stop();
+			if (this.ls.getNormalizedLightValue() < 420 && left == false) {
+				this.robot.getLeftMotor().stop(true);
+				left = true;
 				i++;
 			}
-			if (this.rls.getNormalizedLightValue() < 440) {
-				this.robot.getRightMotor().stop();
+			if (this.rls.getNormalizedLightValue() < 440 && right == false) {
+				this.robot.getRightMotor().stop(true);
+				right = true;
 				i++;
 			}
 		}
