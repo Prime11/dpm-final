@@ -185,6 +185,7 @@ public class Navigation {
 				inputStack.pop();
 				inputStack.push(backPedalStack.peek());	
 				inputStack.push(backPedalStack.peek());
+				break;
 			}
 		}
 		Sound.beep();
