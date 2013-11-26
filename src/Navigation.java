@@ -179,6 +179,9 @@ public class Navigation {
 				break;
 			}
 		}
+		if (detector.hasThreeBlocks()){
+			this.pathF.generatePath(true, backPedalStack.peek().x, backPedalStack.peek().y, this.pathF.finishX, this.pathF.finishY, inputStack);
+		}
 		//Sound.beep();
 		LCD.drawString("Exited the loop", 0, 3);
 		// When it exits the loop, STOP

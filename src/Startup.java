@@ -68,8 +68,8 @@ public class Startup {
 			
 			LCD.drawString("I'm a " + PlayerRole.lookupRole(role) + "!", 5, 0);
 			Sound.systemSound(false, 2);
-			finalX = Math.abs(safeZ[2] - safeZ[0]) / 2;
-			finalY = Math.abs(safeZ[3] - safeZ[1]) / 2;
+			//finalX = Math.abs(safeZ[2] + safeZ[0]) / 2;
+			//finalY = Math.abs(safeZ[3] + safeZ[1]) / 2;
 			greenX1 = safeZ[0];
 			greenY1 = safeZ[1];
 			greenX2 = safeZ[2];
@@ -110,6 +110,7 @@ public class Startup {
 
 		//new object detection class to fit our robot
 		Detection detect = new Detection(detectionLS);
+		detect.run();
 		// initiate the localization object and perform the localization.
 		//USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
 		//usl.doLocalization();
@@ -142,12 +143,12 @@ public class Startup {
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
 		OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
 	
-		pathfinder.setFinal(finalX, finalY);
+		//pathfinder.setFinal(finalX, finalY);
 		pathfinder.setArenaSize(widthX, widthY);
 		pathfinder.setStarter(startX, startY);
 		pathfinder.setRedZone(redX1, redY1, redX2, redY2);
-		pathfinder.createDangerList();
-		pathfinder.generateSetPath();
+		pathfinder.setGreenZone(greenX1, greenY1, greenX2, greenY2);
+		pathfinder.insertCornersIntoRedZone(startID);
 		//Stack<Point> inputStack = new Stack<Point>();
 		//nav.travelTo(2,2,15, inputStack, inputStack);
 		//corrector.start();

@@ -12,6 +12,9 @@ public class Wrangler {
 	double finishX, finishY;
 	double redX1, redY1;
 	double redX2, redY2;
+	double greenX1, greenY1;
+	double greenX2, greenY2;
+	double greenMidX, greenMidY;
 	double startX, startY;
 	int widthX, widthY;
 	Stack<Point> currentStack = new Stack<Point>();
@@ -87,6 +90,47 @@ public class Wrangler {
 		this.redY2 = redY2;		
 	}
 
+	/** Sets finalGreenZone;
+	 * 
+	 * @param greenX1
+	 * @param greenY1
+	 * @param greenX2
+	 * @param greenY2
+	 */
+	public void setGreenZone(double greenX1, double greenY1, double greenX2, double greenY2){
+		this.greenX1 = greenX1;
+		this.greenY1 = greenY1;
+		this.greenX2 = greenX2;
+		this.greenY2 = greenY2;
+	}
+	
+	/** Sets middle of GreenZone for finalPosition
+	 * 
+	 */
+	public void setGreenMid(){
+		this.finishX = (this.greenX1 + this.greenX2)/2;
+		this.finishY = (this.greenY1 + this.greenY2)/2;
+	}
+	
+	/** Inserts corners into Red Zone
+	 * 
+	 * @param startID
+	 */
+	public void insertCornersIntoRedZone(int startID){
+		if (startID != 1) {
+			insertIntoDangerList(0, 0, 0, 0);
+		}
+		if (startID != 2) {
+			insertIntoDangerList(this.widthX, 0, this.widthX, 0);
+		}
+		if (startID != 3) {
+			insertIntoDangerList(this.widthX, this.widthY, this.widthX, this.widthY);
+		}
+		if (startID != 4) {
+			insertIntoDangerList(0, this.widthY, 0, this.widthY);
+		}
+	}
+	
 	/**
 	 * Creates the initial DangerList
 	 */
@@ -233,6 +277,9 @@ public class Wrangler {
 	 * 
 	 */
 	public void runSimpleCourse() {
+		setGreenMid();
+		createDangerList();
+		generateSetPath();
 		Point o = new Point();
 		while (!this.currentStack.isEmpty()) {
 			if (!isDangerous(this.currentStack.peek())
