@@ -8,7 +8,7 @@ public class Wrangler {
 
 	Odometer odo;
 	TwoWheeledRobot patbot;
-	ObjectDetection detect;
+	Detection detect;
 	double finishX, finishY;
 	double redX1, redY1;
 	double redX2, redY2;
@@ -33,7 +33,7 @@ public class Wrangler {
 	 * @param gateMotor
 	 */
 	public Wrangler(Odometer odo, TwoWheeledRobot patbot,
-			ObjectDetection detect, // LightLocalizer localizer,
+			Detection detect, // LightLocalizer localizer,
 			UltraSensor ultra, NXTRegulatedMotor gateMotor) {
 		this.odo = odo;
 		this.patbot = patbot;

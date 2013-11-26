@@ -12,7 +12,7 @@ import lejos.util.TimerListener;
 public class Odometer implements TimerListener {
 	public static final int DEFAULT_PERIOD = 25;
 	private TwoWheeledRobot robot;
-	private ObjectDetection oDetect;
+	private Detection oDetect;
 	private Timer odometerTimer;
 	private Navigation nav;
 	// position data

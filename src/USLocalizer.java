@@ -27,7 +27,7 @@ public class USLocalizer {
 	private LocalizationType locType;
 	private Navigation nav;
 	private UltraSensor ultra;
-	private ObjectDetection oDetect;
+	private Detection oDetect;
 
 	/**
 	 * Constructor
