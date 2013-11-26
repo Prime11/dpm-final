@@ -30,7 +30,7 @@ public class Navigation {
 	private UltraSensor uSonic;
 	private int threshold = 15;
 	private Wrangler pathF;
-	
+	private Detection detector;
 	// Navigation constructor
 	/**
 	 * 
@@ -47,6 +47,7 @@ public class Navigation {
 		this.robot.getLeftMotor().setAcceleration(500);
 		this.robot.getRightMotor().setAcceleration(500);
 		this.uSonic = uSonic;
+		this.detector = detector;
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class Navigation {
 	 * @param uSonic
 	 * @param pathF
 	 */
-	public Navigation(Odometer odometer, UltraSensor uSonic, Wrangler pathF) {
+	public Navigation(Odometer odometer, UltraSensor uSonic, Wrangler pathF, Detection detector) {
 		this.odo = odometer;
 		this.robot = odo.getTwoWheeledRobot();
 		wheelRadii = Startup.WHEELRADIUS;  // wheel radius
@@ -126,7 +127,7 @@ public class Navigation {
 			
 			if (Math.sqrt(Math.pow(x - this.odo.getX(), 2)
 					+ Math.pow(y - this.odo.getY(), 2)) <= 15.0) {
-				odo.getPosition(pos);
+				this.odo.getPosition(pos);
 				currentX = this.odo.getX();
 				currentY = this.odo.getY();
 				deltaX = x - currentX;
@@ -169,13 +170,16 @@ public class Navigation {
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
 				}
 				inputStack.pop();
-				LCD.drawString("" + inputStack.peek().pointToString(), 0, 5);
-				inputStack.push(backPedalStack.peek());	
-				inputStack.push(backPedalStack.pop());
+				backPedalStack.pop();
+				this.pathF.generatePath(false, backPedalStack.peek().x, backPedalStack.peek().y, inputStack.peek().x, inputStack.peek().y, inputStack);
+				//LCD.clear(7);
+				//LCD.drawString("" + inputStack.peek().pointToString(), 0, 7);
+				//inputStack.push(backPedalStack.peek());
+				//inputStack.push(backPedalStack.pop());
 				break;
 			}
 		}
-		Sound.beep();
+		//Sound.beep();
 		LCD.drawString("Exited the loop", 0, 3);
 		// When it exits the loop, STOP
 		this.robot.stop(0);
@@ -186,6 +190,7 @@ public class Navigation {
 			// there is nothing to be done here because it is not expected
 			// that the odometer will be interrupted by another thread
 		}
+		
 
 		// sets navigation to false when it gets to destination
 		isNav = false;

@@ -110,7 +110,6 @@ public class Startup {
 
 		//new object detection class to fit our robot
 		Detection detect = new Detection(detectionLS);
-
 		// initiate the localization object and perform the localization.
 		//USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
 		//usl.doLocalization();
