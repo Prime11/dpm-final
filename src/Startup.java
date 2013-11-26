@@ -126,6 +126,10 @@ public class Startup {
 		//lsl.doLocalization();
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
 		
+		//code for opening gate motor
+		//this first rotation to be done right after localization
+		gateMotor.rotate(7);
+		
 		newBot.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
 		odometer.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
 		
@@ -137,7 +141,6 @@ public class Startup {
 		
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
 		OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
-		
 		
 		try {
 			Thread.sleep(5000);
