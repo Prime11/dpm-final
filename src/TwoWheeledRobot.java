@@ -11,14 +11,22 @@
 import lejos.nxt.NXTRegulatedMotor;
 
 public class TwoWheeledRobot {
-	public static final double DEFAULT_LEFT_RADIUS = 2.125; // 2.21
-	public static final double DEFAULT_RIGHT_RADIUS = 2.125;
-	public static final double DEFAULT_WIDTH = 14.9;
+	public static final double DEFAULT_LEFT_RADIUS = Startup.WHEELRADIUS; // 2.21
+	public static final double DEFAULT_RIGHT_RADIUS = Startup.WHEELRADIUS; ;
+	public static final double DEFAULT_WIDTH = Startup.WHEELWIDTH;
 	private NXTRegulatedMotor leftMotor, rightMotor;
 	private double leftRadius, rightRadius, width;
 	private double forwardSpeed;
 	private double rotationSpeed;
 
+	/**
+	 * 
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param width
+	 * @param leftRadius
+	 * @param rightRadius
+	 */
 	public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
 			NXTRegulatedMotor rightMotor, double width, double leftRadius,
 			double rightRadius) {
@@ -31,20 +39,23 @@ public class TwoWheeledRobot {
 		// this.rightMotor.setAcceleration(100);
 	}
 
-	public NXTRegulatedMotor getRightMotor() {
-		return this.rightMotor;
-	}
-
-	public NXTRegulatedMotor getLeftMotor() {
-		return this.leftMotor;
-	}
-
+	/**
+	 * 
+	 * @param leftMotor
+	 * @param rightMotor
+	 */
 	public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
 			NXTRegulatedMotor rightMotor) {
 		this(leftMotor, rightMotor, DEFAULT_WIDTH, DEFAULT_LEFT_RADIUS,
 				DEFAULT_RIGHT_RADIUS);
 	}
 
+	/**
+	 * 
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param width
+	 */
 	public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
 			NXTRegulatedMotor rightMotor, double width) {
 		this(leftMotor, rightMotor, width, DEFAULT_LEFT_RADIUS,
@@ -64,6 +75,10 @@ public class TwoWheeledRobot {
 				/ width;
 	}
 
+	/**
+	 * 
+	 * @param data
+	 */
 	public void getDisplacementAndHeading(double[] data) {
 		int leftTacho, rightTacho;
 		leftTacho = leftMotor.getTachoCount();
@@ -74,17 +89,49 @@ public class TwoWheeledRobot {
 		data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
 	}
 
+	public NXTRegulatedMotor getRightMotor() {
+		return this.rightMotor;
+	}
+
+	public NXTRegulatedMotor getLeftMotor() {
+		return this.leftMotor;
+	}
+
 	// mutators
+
+	/**
+	 * 
+	 * @param wheelRadii
+	 * @param width
+	 */
+	public void setRobotParts(double wheelRadii, double width) {
+		this.leftRadius = wheelRadii;
+		this.rightRadius = wheelRadii;
+		this.width = width;
+	}
+
+	/**
+	 * 
+	 * @param speed
+	 */
 	public void setForwardSpeed(double speed) {
 		this.forwardSpeed = speed;
 		setSpeeds(forwardSpeed, rotationSpeed);
 	}
 
+	/**
+	 * 
+	 * @param speed
+	 */
 	public void setRotationSpeed(double speed) {
 		this.rotationSpeed = speed;
 		setSpeeds(forwardSpeed, rotationSpeed);
 	}
 
+	/**
+	 * 
+	 * @param f
+	 */
 	// moves robot forward until told to stop in...
 	public void goForward(int f) {
 		if (f % 2 == 0) {
@@ -97,15 +144,21 @@ public class TwoWheeledRobot {
 	}
 
 	// stop method
+	/**
+	 * 
+	 * @param f
+	 */
 	public void stop(int f) {
-			leftMotor.stop();
-			rightMotor.stop();
+		//leftMotor.setAcceleration(1000);
+		//rightMotor.setAcceleration(1000);
+		leftMotor.stop(true);
+		rightMotor.stop(false);
 	}
 
 	// Added two methods to rotate the robot either Clockwise or CountClockwise
 	// below
 	public void rotateClockwise() {
-		//LCD.drawString("Rotating", 0, 7);
+		// LCD.drawString("Rotating", 0, 7);
 		leftMotor.setSpeed((int) rotationSpeed);
 		rightMotor.setSpeed((int) rotationSpeed);
 		leftMotor.forward();
@@ -119,6 +172,11 @@ public class TwoWheeledRobot {
 		rightMotor.forward();
 	}
 
+	/**
+	 * 
+	 * @param forwardSpeed
+	 * @param rotationalSpeed
+	 */
 	public void setSpeeds(double forwardSpeed, double rotationalSpeed) {
 		double leftSpeed, rightSpeed;
 
@@ -156,4 +214,15 @@ public class TwoWheeledRobot {
 		else
 			rightMotor.setSpeed((int) rightSpeed);
 	}
+
+	// added methods to work with Odometry Correction
+	public void leftStop() {
+		leftMotor.stop(true);
+	}
+
+	public void rightStop() {
+		rightMotor.stop(true);
+
+	}
+
 }

@@ -8,9 +8,10 @@
  * Antonio D'Aversa, Student ID: 260234498
  */
 
+import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
-//import lejos.nxt.LCD;
+import lejos.nxt.Sound;
 
 import java.util.Stack;
 
@@ -24,36 +25,86 @@ public class Navigation {
 	private double deltaX = 0, deltaY = 0, deltaTheta = 0, heading;
 	private static final double PI = Math.PI;
 	private double wheelRadii, width;
-	private ObjectDetection oDetect;
-	UltraDisplay ultra;
 	private double[] pos = new double[3];
-	private boolean yesItHasBlock = false;
-
+	private boolean isTurning = false;
+	private UltraSensor uSonic;
+	private int threshold = 15;
+	private Wrangler pathF;
+	
 	// Navigation constructor
-	public Navigation(Odometer odometer, ObjectDetection oDetect,
-			UltraDisplay ultra) {
+	/**
+	 * 
+	 * @param odometer
+	 * @param uSonic
+	 */
+	public Navigation(Odometer odometer, UltraSensor uSonic) {
 		this.odo = odometer;
 		this.robot = odo.getTwoWheeledRobot();
-		this.oDetect = oDetect;
-		this.ultra = ultra;
-		wheelRadii = 1.978; // wheel radius
-
-		width = 18.62; // width between wheels
-
-		// set the acceleration to prevent slipping.
+		wheelRadii = Startup.WHEELRADIUS; // wheel radius
+		width = Startup.WHEELWIDTH; // width between wheels
+		this.pathF = new Wrangler(odometer, robot, null, uSonic, leftMotor);
+		//set the acceleration to prevent slipping.
+		this.robot.getLeftMotor().setAcceleration(500);
+		this.robot.getRightMotor().setAcceleration(500);
+		this.uSonic = uSonic;
 	}
 
+	/**
+	 * 
+	 * @param odometer
+	 * @param uSonic
+	 * @param pathF
+	 */
+	public Navigation(Odometer odometer, UltraSensor uSonic, Wrangler pathF) {
+		this.odo = odometer;
+		this.robot = odo.getTwoWheeledRobot();
+		wheelRadii = Startup.WHEELRADIUS;  // wheel radius
+		width = Startup.WHEELWIDTH;  // width between wheels
+		this.pathF = pathF;
+		//set the acceleration to prevent slipping.
+		this.robot.getLeftMotor().setAcceleration(1000);
+		this.robot.getRightMotor().setAcceleration(1000);
+		this.uSonic = uSonic;
+	}
+
+	/**
+	 * 
+	 * @param wheelRadii
+	 * @param width
+	 */
+	public void setRobotParts(double wheelRadii, double width){
+		this.width = width;
+		this.wheelRadii = wheelRadii;
+	}
+
+	public boolean hasBlock(){
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param threshold
+	 */
+	public void setThreshold(int threshold){
+		this.threshold = threshold;
+	}
+	
 	// Travel to method which determines the distance that robot needs to travel
-	public Stack<Point> travelTo(double x, double y, int sensorThreshold,
-			Stack<Point> currentPath) {
-
-		// Travel to method which determines the distance that robot needs to
-		// travel
-
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @param threshold
+	 * @param inputStack
+	 * @param backPedalStack
+	 * @return
+	 */
+	public Stack<Point> travelTo(double x, double y, int threshold, Stack<Point> inputStack, Stack<Point> backPedalStack) {
 		// Sets Navigation to true
 		isNav = true;
+	
 		// set the motor speeds
-		this.robot.setForwardSpeed(250);
+		this.robot.setForwardSpeed(150);
 		// clear and write to the LCD
 		odo.getPosition(pos);
 		// Calculate the heading of the robot and turn towards it
@@ -64,51 +115,80 @@ public class Navigation {
 		heading = Math.atan2(deltaX, deltaY);
 		turnTo(heading);
 		this.odo.getPosition(pos);
-
+		
 		// Until the robot is at its destination within 1 cm, it will move
 		// forward in the heading's direction
-		while (Math.abs(x - this.odo.getX()) >= 1.0
-				|| Math.abs(y - this.odo.getY()) >= 1.0) {
 
-			// if theta is within the threshold go straight
-			//if (Math.abs(this.odo.getAng() - heading) < 4) {
-				this.robot.getLeftMotor().setSpeed(100);
-				this.robot.getRightMotor().setSpeed(100);
+		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 7.0) {
+			// 15 cms before reaching its destination and if the angle Theta of the odometer is off, recalculate the heading and
+			// change the direction of the odometer.
+			//correct the first if
+			//LCD.clear(5);
+			//LCD.drawInt((int) Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)), 0 , 5);
+			//LCD.drawInt((int) x, 0, 5);
+			//LCD.drawInt((int) y, 6, 5);
+			
+			LCD.clear(3);
+			LCD.drawString("First Loop", 0, 3);
+			//LCD.clear(5);
+			//LCD.drawInt((int) angleDiff(this.odo.getAng(), Math.toDegrees(heading)), 0, 5);
+			//LCD.drawInt((int)this.odo.getAng(), 0, 5);
+			//LCD.drawInt((int)Math.toDegrees(heading), 7, 5);
+			
+			if( Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) <= 15.0){
+				odo.getPosition(pos);
+				currentX = this.odo.getX();
+				currentY = this.odo.getY();
+				deltaX = x - currentX;
+				deltaY = y - currentY;
+				
+				//compute the new heading, compare it to the robot's current theta and turnTo if necessary
+				heading = Math.atan2(deltaX, deltaY);
+				
+				
+				// TODO FIX THIS SHIT!!! (specificlly the if statement below)
+				//IF we are more than 5 degrees off course, stop and turnTo correct.
+				if(angleDiff(this.odo.getAng(), Math.toDegrees(heading)) > 10){
+					
+					this.robot.stop(0);
+					turnTo(heading);
+				}
+				
+			}
+			
+			//Paused to allow odometryCorrection to perform a correction
+			if (odo.isPaused() == false && uSonic.getDist() > this.threshold) {
+				LCD.clear(4);
+				//LCD.drawString("odo is not paused", 0, 4);
+				LCD.drawInt(uSonic.getDist(), 0, 4);
+				this.robot.getLeftMotor().setSpeed(200);
+				this.robot.getRightMotor().setSpeed(200);
 				this.robot.getLeftMotor().forward();
 				this.robot.getRightMotor().forward();
-			//}
-			// if not adjust theta by simply using turnto.
-			//else {
-				//turnTo(heading);
-			//}
-			if (this.ultra.getDist() < sensorThreshold) {
-				double firstHeading = this.odo.getAng();
-				double finalHeading = 0;
-				int objectI = this.oDetect.identify();
-				turnTo(Math.toRadians((this.odo.getAng() - 20.0)));
-				finalHeading = this.odo.getAng();
-				objectI = this.oDetect.identify();
-				turnTo(Math.toRadians(firstHeading));
-				if (objectI == 1) {
-					double turnToHeading = this.odo.getAng() + 35.0;
-					// turnTo(Math.toRadians((this.odo.getAng() + 35.0)));
-					currentPath.push(new Point(this.odo.getX() + 30
-							* Math.cos(Math.toRadians(turnToHeading)), this.odo.getY() + 30
-							* Math.sin(Math.toRadians(turnToHeading)), false));
-					yesItHasBlock = true;
-					break;
-				} else if (objectI == 2) {
-					currentPath = avoidObstacle(currentPath);
-					break;
-				}
 			}
-
-			// if not adjust theta by simply using turnto.
-			//else {
-				//turnTo(heading);
-			//}
+			else if (uSonic.getDist() <= this.threshold){
+				this.robot.stop(0);
+				Point newP = new Point();
+				if (this.odo.getAng() < 10 || this.odo.getAng() > 350){
+					newP = Point.upAdjacentPoint(inputStack.peek());
+					this.pathF.insertIntoDangerList(newP.x, newP.y, newP.x, newP.y+1);
+				} else if (this.odo.getAng() > 80 || this.odo.getAng() < 100){
+					newP = Point.rightAdjacentPoint(inputStack.peek());
+					this.pathF.insertIntoDangerList(newP.x, newP.y, newP.x + 1, newP.y);
+				} else if (this.odo.getAng() > 170 || this.odo.getAng() < 190){
+					newP = Point.downAdjacentPoint(inputStack.peek());
+					this.pathF.insertIntoDangerList(newP.x, newP.y, newP.x, newP.y-1);
+				} else if (this.odo.getAng() > 260 || this.odo.getAng() < 280){
+					newP = Point.leftAdjacentPoint(inputStack.peek());
+					this.pathF.insertIntoDangerList(newP.x, newP.y, newP.x-1, newP.y);
+				}
+				inputStack.pop();
+				inputStack.push(backPedalStack.peek());	
+				inputStack.push(backPedalStack.peek());
+			}
 		}
-
+		Sound.beep();
+		LCD.drawString("Exited the loop", 0, 3);
 		// When it exits the loop, STOP
 		this.robot.stop(0);
 		// 1 second cat-nap
@@ -121,29 +201,21 @@ public class Navigation {
 
 		// sets navigation to false when it gets to destination
 		isNav = false;
-		return currentPath;
+
 		// UPDATE LCD
 		// this.odo.getPosition(pos);
+		return inputStack;
 	}
 
-	public boolean hasBlock() {
-		return this.yesItHasBlock;
-	}
-
-	public Stack<Point> avoidObstacle(Stack<Point> currentPath) {
-		currentPath.push(new Point(this.odo.getX(), this.odo.getY() + 30.46,
-				false));
-		currentPath.push(new Point(this.odo.getX()
-				+ Math.cos(Math.toRadians(odo.getAng())) * 60.98, this.odo
-				.getY(), false));
-		currentPath.push(new Point(this.odo.getX(), this.odo.getY() - 30.46,
-				false));
-		return currentPath;
-	}
-
+	//takes input in radians?
+	/**
+	 * 
+	 * @param theta
+	 */
 	public void turnTo(double theta) {
 		isNav = true;
-
+		isTurning = true;
+		
 		// Finds current heading according to odometer
 		currentTheta = pos[2];
 		deltaTheta = theta - Math.toRadians(currentTheta);
@@ -157,23 +229,64 @@ public class Navigation {
 
 		// Performs rotation
 		deltaTheta = Math.toDegrees(deltaTheta);
+		this.robot.getLeftMotor().rotate(convertAngle(wheelRadii, width, deltaTheta), true);
+		this.robot.getRightMotor().rotate(-convertAngle(wheelRadii, width, deltaTheta), false);
+		
+		isTurning = false;
+	}
+	
+	//THE INPUT ANGLE MUST BE IN DEGREES
+	//Compute the angle difference between the heading and the odometer angles..
+	//Return the minimum difference between the two angles
+	/**
+	 * 
+	 * @param odometerAngle
+	 * @param newHeading
+	 * @return
+	 */
+	public static double angleDiff(double odometerAngle, double newHeading) {
 
-		this.robot.getLeftMotor().rotate(
-				convertAngle(wheelRadii, width, deltaTheta), true);
-		this.robot.getRightMotor().rotate(
-				-convertAngle(wheelRadii, width, deltaTheta), false);
+		if (Math.abs(newHeading - (odometerAngle + 360) % 360) < Math.abs(newHeading - (odometerAngle - 360) % 360)) {
+			return Math.abs(newHeading - (odometerAngle + 360) % 360);
+		} 
+		else {
+			return Math.abs(newHeading - (odometerAngle - 360) % 360);
+		}
+
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	boolean isNavigating() {
 		return isNav;
 	}
+	
+	//added in order to work with Odometry Correction.
+	boolean isTurning(){
+		return isTurning;
+	}
 
 	// Method "borrowed" from SquareDriver.java
+	/**
+	 * 
+	 * @param radius
+	 * @param distance
+	 * @return
+	 */
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
 	// Method "borrowed" from SquareDriver.java
+	/**
+	 * 
+	 * @param radius
+	 * @param width
+	 * @param angle
+	 * @return
+	 */
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}

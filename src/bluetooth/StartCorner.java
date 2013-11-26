@@ -31,7 +31,7 @@ public enum StartCorner {
 		return this.name;
 	}
 	
-	public int[] getCooridinates() {
+	public int[] getCoordinates() {
 		return new int[] {this.x, this.y};
 	}
 	

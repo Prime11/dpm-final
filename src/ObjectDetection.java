@@ -22,8 +22,13 @@ public class ObjectDetection {
 	//private int objectCount;
 	//private boolean sameObject;
 	//private double x1, x2;
-
 	// constructor
+
+	/**
+	 * Constructor
+	 * @param cs
+	 * @param us
+	 */
 	public ObjectDetection(ColorSensor cs, UltrasonicSensor us) {
 		this.cs = cs;
 		//this.us = us;
@@ -36,6 +41,11 @@ public class ObjectDetection {
 	}
 	
 	// Method must be modified according to the testing data
+
+	/**
+	 * Identifies block or blue palette
+	 * @return
+	 */
 	public int identify() {
 		LCD.clear();
 		int returnValue = 2;

@@ -16,7 +16,7 @@ public class USLocalizer {
 		FALLING_EDGE, RISING_EDGE
 	};
 
-	public static int ROTATION_SPEED = 200;
+	public static int ROTATION_SPEED = 300;
 	public static int FORWARD_SPEED = 250;
 	public static int WALL_THRESHOLD = 50;
 
@@ -26,21 +26,30 @@ public class USLocalizer {
 	private UltrasonicSensor us;
 	private LocalizationType locType;
 	private Navigation nav;
-	private UltraDisplay ultra;
+	private UltraSensor ultra;
 	private ObjectDetection oDetect;
 
+	/**
+	 * Constructor
+	 * @param odo
+	 * @param us
+	 * @param locType
+	 */
 	public USLocalizer(Odometer odo, UltrasonicSensor us,
 			LocalizationType locType) {
 		this.odo = odo;
 		this.robot = odo.getTwoWheeledRobot();
 		this.us = us;
 		this.locType = locType;
-		this.nav = new Navigation(this.odo, this.oDetect, this.ultra);
+		this.nav = new Navigation(this.odo/*, this.oDetect*/, this.ultra);
 
 		// switch off the ultrasonic sensor
 		// us.off();
 	}
 
+	/**
+	 * Performs Localization
+	 */
 	public void doLocalization() {
 		double[] pos = new double[3];
 		int filterCount = 0;
@@ -209,6 +218,11 @@ public class USLocalizer {
 		}
 	}
 
+
+	/**
+	 * Gets FilteredData and returns Distance between sensor and brick
+	 * @return
+	 */
 	private int getFilteredData() {
 		int distance;
 
