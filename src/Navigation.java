@@ -119,7 +119,7 @@ public class Navigation {
 		// Until the robot is at its destination within 1 cm, it will move
 		// forward in the heading's direction
 
-		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 7.0) {
+		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 3.0) {
 			// 15 cms before reaching its destination and if the angle Theta of the odometer is off, recalculate the heading and
 			// change the direction of the odometer.
 			//correct the first if

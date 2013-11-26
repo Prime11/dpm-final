@@ -5,14 +5,19 @@
 import lejos.nxt.*;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 import bluetooth.PlayerRole;
 import bluetooth.StartCorner;
 
 public class Startup {
 	//Constants - change them here instead of changing them EVERYWHERE else!
-	public final static double WHEELRADIUS = 1.985;
-	public final static double WHEELWIDTH = 18.65;
+	public final static double WHEELRADIUS = 1.978;
+	public final static double WHEELWIDTH = 17.85;
+	
+	//Note that the cage motor must be rotated only 7 degrees from a position where it is closed.
+	//And the door must be opened enouhg so that the black peice does not interfere with the blocks when dropping them off
+	
 	
 	/**
 	 * 
@@ -23,7 +28,7 @@ public class Startup {
 		//Set if it uses Bluetooth Program
 		boolean useBluetooth = false;
 		
-		double finalX = 2, finalY = 7;
+		double finalX = 6, finalY = 7;
 		double startX = 0, startY = 0;
 		int startID = 1;
 		double redX1 = 0, redY1 = 8, redX2 = 8, redY2 = 8;
@@ -34,7 +39,7 @@ public class Startup {
 		//After it localizes
 		double robotWheelRadiiSecond = Startup.WHEELRADIUS, robotWidthSecond = Startup.WHEELWIDTH;
 		//Size of the field
-		int widthX = 2, widthY = 2;
+		int widthX = 6, widthY = 6;
 		boolean [] update = {true, true, true};
 		
 		if (useBluetooth) {
@@ -106,8 +111,8 @@ public class Startup {
 		ObjectDetection detect = new ObjectDetection(detectionLS, us);
 
 		// initiate the localization object and perform the localization.
-		USLocalizer usl = new USLocalizer(odometer, us,
-		USLocalizer.LocalizationType.FALLING_EDGE); usl.doLocalization();
+		//USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
+		//usl.doLocalization();
 	
 		//UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
@@ -115,10 +120,10 @@ public class Startup {
 		// usd.start();
 		// Navigation turn = new Navigation(odometer,detect, usd);
 		// turn.turnTo(Math.toRadians(-70));
-		
+		usd.start();
 		Navigation nav = new Navigation(odometer, usd);
-		LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
-	lsl.doLocalization();
+		//LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
+		//lsl.doLocalization();
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
 		
 		newBot.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
@@ -129,10 +134,10 @@ public class Startup {
 		//boolean[]  updateOdo = {true, true, true};
 		//the final updated position of the odometer with respect to the initial starting tile
 		//odometer.setPosition(position, updateOdo);
-		usd.start();
+		
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
-		//OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
-		//corrector.start();
+		OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
+		
 		
 		try {
 			Thread.sleep(5000);
@@ -146,7 +151,11 @@ public class Startup {
 		pathfinder.setRedZone(redX1, redY1, redX2, redY2);
 		pathfinder.createDangerList();
 		pathfinder.generateSetPath();
+		//Stack<Point> inputStack = new Stack<Point>();
+		//nav.travelTo(2,2,15, inputStack, inputStack);
+		//corrector.start();
 		pathfinder.runSimpleCourse();
+		
 	}
 
 	// the assumption is that the field will be a square

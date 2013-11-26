@@ -1,5 +1,6 @@
 import lejos.nxt.ColorSensor;
 import lejos.nxt.LCD;
+import lejos.nxt.Sound;
 
 /* 
  * OdometryCorrection.java
@@ -55,6 +56,7 @@ public class OdometryCorrection extends Thread {
 			// Sound.beep();
 			// Do not correct if the motors have not stopped.
 			// add isTurning to the Navigation class.
+			Sound.buzz();
 			while (motorStop == false && this.strangle.isTurning() == false) {
 
 				// to debug
@@ -63,7 +65,7 @@ public class OdometryCorrection extends Thread {
 
 				// calibrate the Normalized light values so they work for
 				// competition day
-				if (leftSensor.getNormalizedLightValue() < 430
+				if (leftSensor.getNormalizedLightValue() < 420
 						&& leftStop == false) {
 					this.odometer.setPause(true);
 					this.robot.setForwardSpeed(50);
@@ -74,7 +76,7 @@ public class OdometryCorrection extends Thread {
 
 					// this.odometer.getTwoWheeledRobot().leftStop();
 					leftStop = true;
-				} else if (rightSensor.getNormalizedLightValue() < 490
+				} else if (rightSensor.getNormalizedLightValue() < 440
 						&& rightStop == false) {
 					this.odometer.setPause(true);
 					this.robot.setForwardSpeed(50);
