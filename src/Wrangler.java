@@ -239,40 +239,31 @@ public class Wrangler {
 					&& !this.currentStack.peek().outOfBounds(this.widthX, this.widthY)) {
 				this.currentStack.peek().setVisited();
 				// navi move...
-				//LCD.clear(5);
-				//LCD.drawString(this.currentStack.peek().pointToTV(), 0, 5);
 				this.currentStack = navi.travelTo(this.currentStack.peek().x*30.48, this.currentStack.peek().y*30.48, 15, this.currentStack, this.backPedalStack);
 				//
 				o = this.currentStack.peek();
-				this.backPedalStack.push(this.currentStack.pop());
+				//if (!this.backPedalStack.isEmpty() && !Point.areSamePoints(this.currentStack.peek(), this.backPedalStack.peek())){
+					this.backPedalStack.push(this.currentStack.pop());
+				//}
 			} else {
 				this.currentStack.pop();
 				if (!currentStack.isEmpty()){
 					Point nextP = this.currentStack.peek();
 					if (isDangerous(Point.upAdjacentPoint(this.backPedalStack.peek()))
 							|| isDangerous(Point.downAdjacentPoint(this.backPedalStack.peek()))) {
-						if (this.backPedalStack.peek().x <= (this.redX1 + this.redX2) / 2) {/*
-						System.out.print("\t" + Point.upAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out
-								.print("\t"	+ Point.downAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						if (this.backPedalStack.peek().x <= (this.redX1 + this.redX2) / 2) {
 							this.currentStack.push(Point.leftAdjacentPoint(this.backPedalStack.peek()));
 							this.backPedalStack.push(Point.leftAdjacentPoint(this.backPedalStack.peek()));
-						} else {/*
-						System.out.print("\t" + Point.upAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out.print("\t" + Point.downAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						} else {
 							this.currentStack.push(Point.rightAdjacentPoint(this.backPedalStack.peek()));
 							this.backPedalStack.push(Point.rightAdjacentPoint(this.backPedalStack.peek()));
 						}
 					} else if (isDangerous(Point.rightAdjacentPoint(this.backPedalStack.peek()))
 							|| isDangerous(Point.leftAdjacentPoint(this.backPedalStack.peek()))) {
-						if (this.backPedalStack.peek().y < (this.redY1 + this.redY2) / 2) {/*
-						System.out.print("\t" + Point.leftAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out.print("\t" + Point.rightAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						if (this.backPedalStack.peek().y < (this.redY1 + this.redY2) / 2) {
 							this.currentStack.push(Point.downAdjacentPoint(this.backPedalStack.peek()));
 							backPedalStack.push(Point.downAdjacentPoint(this.backPedalStack.peek()));
-						} else {/*
-						System.out.print("\t" + Point.leftAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out.print("\t" + Point.rightAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						} else {
 							this.currentStack.push(Point.upAdjacentPoint(this.backPedalStack.peek()));
 							this.backPedalStack.push(Point.upAdjacentPoint(this.backPedalStack.peek()));
 						}
