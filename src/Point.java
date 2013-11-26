@@ -6,7 +6,7 @@ public class Point {
 	/**
 	 * Simple 0,0 Constructor
 	 */
-	public Point(){
+	public Point() {
 		this.x = 0;
 		this.y = 0;
 		this.visited = false;
@@ -14,6 +14,7 @@ public class Point {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param x
 	 * @param y
 	 * @param visited
@@ -33,16 +34,18 @@ public class Point {
 
 	/**
 	 * Returns if point is outOfBounds
+	 * 
 	 * @param widthX
 	 * @param widthY
 	 * @return
 	 */
-	public boolean outOfBounds(double widthX, double widthY){
+	public boolean outOfBounds(double widthX, double widthY) {
 		return this.x < 0 || this.x > widthX || this.y < 0 || this.y > widthY;
 	}
 
 	/**
 	 * Returns Point to String
+	 * 
 	 * @return
 	 */
 	public String pointToString() {
@@ -51,6 +54,7 @@ public class Point {
 
 	/**
 	 * Returns Point to Coords if Point is in Distance
+	 * 
 	 * @param stepCase
 	 * @return
 	 */
@@ -61,6 +65,7 @@ public class Point {
 
 	/**
 	 * Returns point to Tabbed Version
+	 * 
 	 * @return
 	 */
 	public String pointToTV() {
@@ -69,17 +74,23 @@ public class Point {
 
 	/**
 	 * Returns true if points are the same
+	 * 
 	 * @param A
 	 * @param B
 	 * @return
 	 */
 	public static boolean areSamePoints(Point A, Point B) {
-		return (Double.compare(A.x, B.x) == 0)
-				&& (Double.compare(A.y, B.y) == 0) && (A.visited == B.visited);
+		if (!A.equals(null) && !B.equals(null)) {
+			return (Double.compare(A.x, B.x) == 0)
+					&& (Double.compare(A.y, B.y) == 0);
+		} else {
+			return false;
+		}
 	}
 
 	/**
 	 * Returns Left Adjacent Point
+	 * 
 	 * @param A
 	 * @return
 	 */
@@ -89,6 +100,7 @@ public class Point {
 
 	/**
 	 * Returns Right Adjacent Point
+	 * 
 	 * @param A
 	 * @return
 	 */
@@ -98,6 +110,7 @@ public class Point {
 
 	/**
 	 * Returns Upper Adjacent Point
+	 * 
 	 * @param A
 	 * @return
 	 */
@@ -107,6 +120,7 @@ public class Point {
 
 	/**
 	 * Returns Lower Adjacent Point
+	 * 
 	 * @param A
 	 * @return
 	 */

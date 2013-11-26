@@ -39,7 +39,7 @@ public class Wrangler {
 		this.patbot = patbot;
 		this.detect = detect;
 		this.ultra = ultra;
-		this.navi = new Navigation(this.odo/* , this.detect*/, this.ultra, this);
+		this.navi = new Navigation(this.odo, this.ultra, this, detect);
 		// this.localizer = localizer;
 	}
 
@@ -229,7 +229,7 @@ public class Wrangler {
 		return generatedStack;
 	}
 
-	/**
+	/** Runs the course according to a stack
 	 * 
 	 */
 	public void runSimpleCourse() {
@@ -237,42 +237,37 @@ public class Wrangler {
 		while (!this.currentStack.isEmpty()) {
 			if (!isDangerous(this.currentStack.peek())
 					&& !this.currentStack.peek().outOfBounds(this.widthX, this.widthY)) {
+				LCD.clear(5);
+				LCD.drawString(currentStack.peek().pointToString(), 0, 5);
 				this.currentStack.peek().setVisited();
 				// navi move...
-				//LCD.clear(5);
-				//LCD.drawString(this.currentStack.peek().pointToTV(), 0, 5);
 				this.currentStack = navi.travelTo(this.currentStack.peek().x*30.48, this.currentStack.peek().y*30.48, 15, this.currentStack, this.backPedalStack);
-				//
 				o = this.currentStack.peek();
+				LCD.clear(6);
+				if (!backPedalStack.isEmpty()){
+					LCD.drawString(backPedalStack.peek().pointToString(), 0, 6);
+				}
 				this.backPedalStack.push(this.currentStack.pop());
+			
 			} else {
 				this.currentStack.pop();
 				if (!currentStack.isEmpty()){
 					Point nextP = this.currentStack.peek();
 					if (isDangerous(Point.upAdjacentPoint(this.backPedalStack.peek()))
 							|| isDangerous(Point.downAdjacentPoint(this.backPedalStack.peek()))) {
-						if (this.backPedalStack.peek().x <= (this.redX1 + this.redX2) / 2) {/*
-						System.out.print("\t" + Point.upAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out
-								.print("\t"	+ Point.downAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						if (this.backPedalStack.peek().x <= (this.redX1 + this.redX2) / 2) {
 							this.currentStack.push(Point.leftAdjacentPoint(this.backPedalStack.peek()));
 							this.backPedalStack.push(Point.leftAdjacentPoint(this.backPedalStack.peek()));
-						} else {/*
-						System.out.print("\t" + Point.upAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out.print("\t" + Point.downAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						} else {
 							this.currentStack.push(Point.rightAdjacentPoint(this.backPedalStack.peek()));
 							this.backPedalStack.push(Point.rightAdjacentPoint(this.backPedalStack.peek()));
 						}
 					} else if (isDangerous(Point.rightAdjacentPoint(this.backPedalStack.peek()))
 							|| isDangerous(Point.leftAdjacentPoint(this.backPedalStack.peek()))) {
-						if (this.backPedalStack.peek().y < (this.redY1 + this.redY2) / 2) {/*
-						System.out.print("\t" + Point.leftAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out.print("\t" + Point.rightAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						if (this.backPedalStack.peek().y < (this.redY1 + this.redY2) / 2) {
 							this.currentStack.push(Point.downAdjacentPoint(this.backPedalStack.peek()));
 							backPedalStack.push(Point.downAdjacentPoint(this.backPedalStack.peek()));
-						} else {/*
-						System.out.print("\t" + Point.leftAdjacentPoint(this.backPedalStack.peek()).pointToTV());
-						System.out.print("\t" + Point.rightAdjacentPoint(this.backPedalStack.peek()).pointToTV());*/
+						} else {
 							this.currentStack.push(Point.upAdjacentPoint(this.backPedalStack.peek()));
 							this.backPedalStack.push(Point.upAdjacentPoint(this.backPedalStack.peek()));
 						}

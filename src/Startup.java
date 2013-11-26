@@ -110,7 +110,6 @@ public class Startup {
 
 		//new object detection class to fit our robot
 		Detection detect = new Detection(detectionLS);
-
 		// initiate the localization object and perform the localization.
 		//USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
 		//usl.doLocalization();
@@ -142,13 +141,7 @@ public class Startup {
 		
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
 		OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
-		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
 		pathfinder.setFinal(finalX, finalY);
 		pathfinder.setArenaSize(widthX, widthY);
 		pathfinder.setStarter(startX, startY);
