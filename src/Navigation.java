@@ -47,7 +47,6 @@ public class Navigation {
 		this.robot.getLeftMotor().setAcceleration(500);
 		this.robot.getRightMotor().setAcceleration(500);
 		this.uSonic = uSonic;
-		this.detector = detector;
 	}
 
 	/**
@@ -66,6 +65,8 @@ public class Navigation {
 		this.robot.getLeftMotor().setAcceleration(1000);
 		this.robot.getRightMotor().setAcceleration(1000);
 		this.uSonic = uSonic;
+		this.detector = detector;
+
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class Navigation {
 	 * @param backPedalStack
 	 * @return
 	 */
-	public Stack<Point> travelTo(double x, double y, int threshold, Stack<Point> inputStack, Stack<Point> backPedalStack) {
+	public Stack<Point> travelTo(boolean localizing, double x, double y, int threshold, Stack<Point> inputStack, Stack<Point> backPedalStack) {
 		// Sets Navigation to true
 		isNav = true;
 	
@@ -120,7 +121,8 @@ public class Navigation {
 		// Until the robot is at its destination within 1 cm, it will move
 		// forward in the heading's direction
 
-		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 3.0) {
+		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 3.0 
+				|| localizing && this.pathF.insideGreenZone(this.odo.getX(), this.odo.getY())) {
 			// 15 cms before reaching its destination and if the angle Theta of the odometer is off, recalculate the heading and
 			// change the direction of the odometer.
 			//correct the first if
@@ -145,56 +147,50 @@ public class Navigation {
 			}
 			
 			//Paused to allow odometryCorrection to perform a correction
-			if (odo.isPaused() == false && uSonic.getDist() > this.threshold) {
+			if (localizing || odo.isPaused() == false && uSonic.getDist() > this.threshold) {
 				LCD.clear(4);
 				LCD.drawInt(uSonic.getDist(), 0, 4);
-				this.robot.getLeftMotor().setSpeed(200);
-				this.robot.getRightMotor().setSpeed(200);
+				this.robot.getLeftMotor().setSpeed(300);
+				this.robot.getRightMotor().setSpeed(300);
 				this.robot.getLeftMotor().forward();
 				this.robot.getRightMotor().forward();
 			}
-			else if (uSonic.getDist() <= this.threshold){
+			else if (!localizing && uSonic.getDist() <= this.threshold){
 				this.robot.stop(0);
 				Point newP = new Point();
 				if (this.odo.getAng() < 10 || this.odo.getAng() > 350){
-					newP = Point.upAdjacentPoint(inputStack.peek());
-					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
-				} else if (this.odo.getAng() > 80 || this.odo.getAng() < 100){
-					newP = Point.rightAdjacentPoint(inputStack.peek());
-					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
-				} else if (this.odo.getAng() > 170 || this.odo.getAng() < 190){
 					newP = Point.downAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
-				} else if (this.odo.getAng() > 260 || this.odo.getAng() < 280){
+				} else if (this.odo.getAng() > 80 || this.odo.getAng() < 100){
 					newP = Point.leftAdjacentPoint(inputStack.peek());
+					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
+				} else if (this.odo.getAng() > 170 || this.odo.getAng() < 190){
+					newP = Point.upAdjacentPoint(inputStack.peek());
+					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
+				} else if (this.odo.getAng() > 260 || this.odo.getAng() < 280){
+					newP = Point.rightAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
 				}
 				inputStack.pop();
-				backPedalStack.pop();
 				this.pathF.generatePath(false, backPedalStack.peek().x, backPedalStack.peek().y, inputStack.peek().x, inputStack.peek().y, inputStack);
-				//LCD.clear(7);
-				//LCD.drawString("" + inputStack.peek().pointToString(), 0, 7);
-				//inputStack.push(backPedalStack.peek());
-				//inputStack.push(backPedalStack.pop());
+				inputStack.push(backPedalStack.pop());
+				inputStack.push(backPedalStack.pop());
 				break;
 			}
 		}
-		if (detector.hasThreeBlocks()){
-			this.pathF.generatePath(true, backPedalStack.peek().x, backPedalStack.peek().y, this.pathF.finishX, this.pathF.finishY, inputStack);
+		if (!localizing && this.detector.hasThreeBlocks()){
+			this.detector.resetNumberOfBlocks();
+			inputStack.clear();
+			//Localizing is true so that it ignores block avoidance and avoids an infinite loop
+			travelTo(true, this.pathF.getFinishX()*30.48, this.pathF.getFinishY()*30.48, 15, inputStack, backPedalStack);
+			//this.pathF.generatePath(true, backPedalStack.peek().x, backPedalStack.peek().y, this.pathF.getFinishX(), this.pathF.getFinishY(), inputStack);
 		}
 		//Sound.beep();
 		LCD.drawString("Exited the loop", 0, 3);
 		// When it exits the loop, STOP
 		this.robot.stop(0);
 		// 1 second cat-nap
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// there is nothing to be done here because it is not expected
-			// that the odometer will be interrupted by another thread
-		}
 		
-
 		// sets navigation to false when it gets to destination
 		isNav = false;
 
@@ -225,9 +221,13 @@ public class Navigation {
 
 		// Performs rotation
 		deltaTheta = Math.toDegrees(deltaTheta);
+		robot.getLeftMotor().setAcceleration(250);
+		robot.getRightMotor().setAcceleration(250);
 		this.robot.getLeftMotor().rotate(convertAngle(wheelRadii, width, deltaTheta), true);
 		this.robot.getRightMotor().rotate(-convertAngle(wheelRadii, width, deltaTheta), false);
-		
+		this.robot.stop(0);
+		this.robot.getLeftMotor().setAcceleration(900);
+		this.robot.getRightMotor().setAcceleration(900);
 		isTurning = false;
 	}
 	

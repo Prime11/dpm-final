@@ -6,24 +6,24 @@ import lejos.nxt.*;
 
 public class Wrangler {
 
-	Odometer odo;
-	TwoWheeledRobot patbot;
-	Detection detect;
-	double finishX, finishY;
-	double redX1, redY1;
-	double redX2, redY2;
-	double greenX1, greenY1;
-	double greenX2, greenY2;
-	double greenMidX, greenMidY;
-	double startX, startY;
-	int widthX, widthY;
-	Stack<Point> currentStack = new Stack<Point>();
-	Stack<Point> backPedalStack = new Stack<Point>();
-	Navigation navi;
-	LightLocalizer localizer;
-	UltraSensor ultra;
-	NXTRegulatedMotor gateMotor;
-	ArrayList<Point> dangerPointsL = new ArrayList<Point>();
+	private Odometer odo;
+	private TwoWheeledRobot patbot;
+	private Detection detect;
+	private double finishX, finishY;
+	private double redX1, redY1;
+	private double redX2, redY2;
+	private double greenX1, greenY1;
+	private double greenX2, greenY2;
+	private double greenMidX, greenMidY;
+	private double startX, startY;
+	private int widthX, widthY;
+	private Stack<Point> currentStack = new Stack<Point>();
+	private Stack<Point> backPedalStack = new Stack<Point>();
+	private Navigation navi;
+	private LightLocalizer localizer;
+	private UltraSensor ultra;
+	private NXTRegulatedMotor gateMotor;
+	private ArrayList<Point> dangerPointsL = new ArrayList<Point>();
 
 	// Point dangerPoints[] = new Point[12];
 
@@ -112,6 +112,35 @@ public class Wrangler {
 		this.finishY = (this.greenY1 + this.greenY2)/2;
 	}
 	
+	/** Adds the GreenZone to the RedZone for Avoidance
+	 * 
+	 */
+	public void addGreenZoneToRedZone(){
+		int stepsX = (int) Math.round(Math.abs(this.greenX2 - this.greenX1));
+		int stepsY = (int) Math.round(Math.abs(this.greenY2 - this.greenY1));
+		for (int i = 0; i <= stepsX; i++) {
+			for (int j = 0; j <= stepsY; j++) {
+				this.dangerPointsL.add(new Point((greenX1 + i), (greenY1 + j), false));
+			}
+		}
+	}
+	
+	/** returns finish X
+	 * 
+	 * @return
+	 */
+	public double getFinishX(){
+		return this.finishX;
+	}
+	
+	/** returns Finish Y
+	 * 
+	 * @return
+	 */
+	public double getFinishY(){
+		return this.finishY;
+	}
+	
 	/** Inserts corners into Red Zone
 	 * 
 	 * @param startID
@@ -131,6 +160,20 @@ public class Wrangler {
 		}
 	}
 	
+	/** Removes GreenZone from the RedZone() once everything is done
+	 * 
+	 */
+	public void removeGreenZoneFromRedZone() {
+		int stepsX = (int) Math.round(Math.abs(this.greenX2 - this.greenX1));
+		int stepsY = (int) Math.round(Math.abs(this.greenY2 - this.greenY1));
+		for (int i = 0; i <= stepsX; i++) {
+			for (int j = 0; j <= stepsY; j++) {
+				this.dangerPointsL.remove(new Point((greenX1 + i), (greenY1 + j),
+						false));
+			}
+		}
+	}
+
 	/**
 	 * Creates the initial DangerList
 	 */
@@ -162,6 +205,17 @@ public class Wrangler {
 		}
 	}
 
+	public boolean insideGreenZone(double x, double y){
+		if (x > this.greenX1*30.48 && x < this.greenX2*30.48 && y> this.greenY1*30.48 && y < this.greenY2*30.48){
+			return true;
+		} else if (Math.sqrt(Math.pow((x - this.finishX*30.48), 2) + Math.pow((y - this.finishY*30.48), 2)) <= 100.0){
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Is the point Dangerous
 	 * @param currentPoint
@@ -277,9 +331,7 @@ public class Wrangler {
 	 * 
 	 */
 	public void runSimpleCourse() {
-		setGreenMid();
-		createDangerList();
-		generateSetPath();
+		
 		Point o = new Point();
 		while (!this.currentStack.isEmpty()) {
 			if (!isDangerous(this.currentStack.peek())
@@ -288,7 +340,7 @@ public class Wrangler {
 				LCD.drawString(currentStack.peek().pointToString(), 0, 5);
 				this.currentStack.peek().setVisited();
 				// navi move...
-				this.currentStack = navi.travelTo(this.currentStack.peek().x*30.48, this.currentStack.peek().y*30.48, 15, this.currentStack, this.backPedalStack);
+				this.currentStack = navi.travelTo(false, this.currentStack.peek().x*30.48, this.currentStack.peek().y*30.48, 15, this.currentStack, this.backPedalStack);
 				o = this.currentStack.peek();
 				LCD.clear(6);
 				if (!backPedalStack.isEmpty()){

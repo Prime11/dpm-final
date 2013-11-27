@@ -31,15 +31,15 @@ public class Startup {
 		double finalX = 6, finalY = 7;
 		double startX = 0, startY = 0;
 		int startID = 1;
-		double redX1 = 0, redY1 = 8, redX2 = 8, redY2 = 8;
+		double redX1 = 0, redY1 = 7, redX2 = 8, redY2 = 8;
 		//TODO: GreenZone avoidance
-		double greenX1 = 3, greenY1 = 3, greenX2 = 6, greenY2 = 4;
+		double greenX1 = 4, greenY1 = 2, greenX2 = 6, greenY2 = 4;
 		//Before it localizes
 		double robotWheelRadii = Startup.WHEELRADIUS, robotWidth= Startup.WHEELWIDTH;
 		//After it localizes
 		double robotWheelRadiiSecond = Startup.WHEELRADIUS, robotWidthSecond = Startup.WHEELWIDTH;
 		//Size of the field
-		int widthX = 6, widthY = 6;
+		int widthX = 10, widthY = 10;
 		boolean [] update = {true, true, true};
 		
 		if (useBluetooth) {
@@ -109,10 +109,8 @@ public class Startup {
 		LCDInfo lcd = new LCDInfo(odometer);
 
 		//new object detection class to fit our robot
-		Detection detect = new Detection(detectionLS);
-		detect.run();
 		// initiate the localization object and perform the localization.
-		//USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
+		USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
 		//usl.doLocalization();
 	
 		//UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
@@ -123,7 +121,7 @@ public class Startup {
 		// turn.turnTo(Math.toRadians(-70));
 		usd.start();
 		Navigation nav = new Navigation(odometer, usd);
-		//LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
+		LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
 		//lsl.doLocalization();
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
 		
@@ -139,7 +137,8 @@ public class Startup {
 		//boolean[]  updateOdo = {true, true, true};
 		//the final updated position of the odometer with respect to the initial starting tile
 		//odometer.setPosition(position, updateOdo);
-		
+		Detection detect = new Detection(detectionLS);
+		detect.start();
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
 		OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
 	
@@ -149,6 +148,10 @@ public class Startup {
 		pathfinder.setRedZone(redX1, redY1, redX2, redY2);
 		pathfinder.setGreenZone(greenX1, greenY1, greenX2, greenY2);
 		pathfinder.insertCornersIntoRedZone(startID);
+		pathfinder.setGreenMid();
+		pathfinder.createDangerList();
+		//pathfinder.backPedalStack.push(new Point(startX, startY, false));
+		pathfinder.generateSetPath();
 		//Stack<Point> inputStack = new Stack<Point>();
 		//nav.travelTo(2,2,15, inputStack, inputStack);
 		//corrector.start();

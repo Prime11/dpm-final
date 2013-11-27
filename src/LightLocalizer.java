@@ -119,7 +119,7 @@ public class LightLocalizer {
 			e.printStackTrace();
 		}
 
-		this.nav.travelTo(0, 0, 0, inputStack, inputStack);
+		this.nav.travelTo(true, 0, 0, 0, inputStack, inputStack);
 		// adjust the angle so that the the robot facing the y direction
 		this.nav.turnTo(Math.toRadians(0));
 
