@@ -112,12 +112,13 @@ public class Startup {
 		USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
 		usl.doLocalization();
 	
-		//UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltraSensor usd = new UltraSensor(us2);
 		usd.start();
 		
 		Navigation nav = new Navigation(odometer, usd);
+		newBot.getLeftMotor().rotate(-nav.convertAngle(Startup.WHEELRADIUS, Startup.WHEELWIDTH, 60), true);
+		newBot.getRightMotor().rotate(nav.convertAngle(Startup.WHEELRADIUS, Startup.WHEELWIDTH, 60.0), false);
 		LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
 		lsl.doLocalization();
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
@@ -141,6 +142,8 @@ public class Startup {
 		pathfinder.setArenaSize(widthX, widthY);
 		pathfinder.setStarter(startX, startY);
 		pathfinder.setRedZone(redX1, redY1, redX2, redY2);
+		
+		
 		pathfinder.setGreenZone(greenX1, greenY1, greenX2, greenY2);
 		pathfinder.insertCornersIntoRedZone(startID);
 		pathfinder.setGreenMid();

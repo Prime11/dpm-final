@@ -299,7 +299,7 @@ public class Navigation {
 	 * @param angle
 	 * @return
 	 */
-	private static int convertAngle(double radius, double width, double angle) {
+	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 }

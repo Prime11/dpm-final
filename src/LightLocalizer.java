@@ -113,7 +113,7 @@ public class LightLocalizer {
 		// ADDED CODE STARTS HERE - IF IT DOESN'T WORK REMOVE THIS.
 		// travel to the negative values of x and y to get to the actual origin
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -152,14 +152,8 @@ public class LightLocalizer {
 		
 		
 		//sleep maybe
-		
-		
-		
-	
-	
-		//this.robot.getLeftMotor().forward();
 
-		
+		//this.robot.getLeftMotor().forward();
 
 		// localization ends here
 
@@ -172,22 +166,4 @@ public class LightLocalizer {
 		this.odo.setPosition(position, updateOdo);*/
 	}
 
-	// the assumption is that the field will be a square
-	/*
-	 * public static double[] computePosition(int tile, int gridsize) { // pos
-	 * has the format {x, y, theta} double[] pos = new double[3]; double
-	 * tileLength = 30.48;
-	 * 
-	 * // Tile numbers reflect the specifications that were provided in the //
-	 * specification document. if (tile == 1) { // set theta first pos[2] = 0;
-	 * // set y position pos[1] = 0 * tileLength; pos[0] = 0; } else if (tile ==
-	 * 2) { pos[2] = 270; pos[1] = 0; // x will be different pos[0] = (gridsize
-	 * - 2) * tileLength;
-	 * 
-	 * } else if (tile == 3) { pos[2] = 180; pos[1] = (gridsize - 2) *
-	 * tileLength; pos[0] = pos[1]; } else if (tile == 4) { pos[2] = 90; pos[1]
-	 * = (gridsize - 2) * tileLength; pos[0] = 0; }
-	 * 
-	 * return pos; }
-	 */
 }
