@@ -26,14 +26,15 @@ public class Startup {
 	public static void main(String[] args) {
 		
 		//Set if it uses Bluetooth Program
-		boolean useBluetooth = false;
+		boolean useBluetooth = true;
 		
 		double finalX = 6, finalY = 7;
+		//Fix Start Coords WITH STARTID
 		double startX = 0, startY = 0;
 		int startID = 1;
 		double redX1 = 0, redY1 = 7, redX2 = 8, redY2 = 8;
 		//TODO: GreenZone avoidance
-		double greenX1 = 4, greenY1 = 2, greenX2 = 6, greenY2 = 4;
+		double greenX1 = 2, greenY1 = 2, greenX2 = 3, greenY2 = 3;
 		//Before it localizes
 		double robotWheelRadii = Startup.WHEELRADIUS, robotWidth= Startup.WHEELWIDTH;
 		//After it localizes
@@ -55,10 +56,10 @@ public class Startup {
 			role = blue.getTransmission().role.getId();
 			startingCorner = blue.getTransmission().startingCorner.getId();
 			
-			if (role == 1) {
+			if (role == 1) /*Builder*/{
 				safeZ = blue.getTransmission().greenZone;
 				dangerZ = blue.getTransmission().redZone;
-			} else if (role == 2) {
+			} else if (role == 2) /*Garbage Collector*/{
 				safeZ = blue.getTransmission().redZone;
 				dangerZ = blue.getTransmission().greenZone;
 			} else {
@@ -68,8 +69,6 @@ public class Startup {
 			
 			LCD.drawString("I'm a " + PlayerRole.lookupRole(role) + "!", 5, 0);
 			Sound.systemSound(false, 2);
-			//finalX = Math.abs(safeZ[2] + safeZ[0]) / 2;
-			//finalY = Math.abs(safeZ[3] + safeZ[1]) / 2;
 			greenX1 = safeZ[0];
 			greenY1 = safeZ[1];
 			greenX2 = safeZ[2];
@@ -83,7 +82,7 @@ public class Startup {
 		}
 
 		LCD.clear();
-		Button.waitForAnyPress();
+		//Button.waitForAnyPress();
 
 		TwoWheeledRobot newBot = new TwoWheeledRobot(Motor.A, Motor.B);
 		newBot.setRobotParts(robotWheelRadii, robotWidth);
@@ -111,36 +110,32 @@ public class Startup {
 		//new object detection class to fit our robot
 		// initiate the localization object and perform the localization.
 		USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
-		//usl.doLocalization();
+		usl.doLocalization();
 	
 		//UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltraSensor usd = new UltraSensor(us2);
-		// usd.start();
-		// Navigation turn = new Navigation(odometer,detect, usd);
-		// turn.turnTo(Math.toRadians(-70));
 		usd.start();
+		
 		Navigation nav = new Navigation(odometer, usd);
 		LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
-		//lsl.doLocalization();
+		lsl.doLocalization();
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
 		
 		//code for opening gate motor
 		//this first rotation to be done right after localization
-		gateMotor.rotate(7);
+		gateMotor.rotate(22);
+		
 		
 		newBot.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
 		odometer.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
 		
 		//set the current position of the robot
-		//double[] position = computePosition(4 , fieldSize );
-		//boolean[]  updateOdo = {true, true, true};
+		
 		//the final updated position of the odometer with respect to the initial starting tile
-		//odometer.setPosition(position, updateOdo);
 		Detection detect = new Detection(detectionLS);
 		detect.start();
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
-		OdometryCorrection corrector = new OdometryCorrection(odometer, leftLS, rightLS, newBot, pathfinder);
 	
 		//pathfinder.setFinal(finalX, finalY);
 		pathfinder.setArenaSize(widthX, widthY);
@@ -150,12 +145,23 @@ public class Startup {
 		pathfinder.insertCornersIntoRedZone(startID);
 		pathfinder.setGreenMid();
 		pathfinder.createDangerList();
-		//pathfinder.backPedalStack.push(new Point(startX, startY, false));
+		pathfinder.backPedalStack.push(new Point(startX, startY, false));
 		pathfinder.generateSetPath();
-		//Stack<Point> inputStack = new Stack<Point>();
-		//nav.travelTo(2,2,15, inputStack, inputStack);
-		//corrector.start();
 		pathfinder.runSimpleCourse();
+		
+		//the 2 rotates below are to get the blocks into the safe zone due to the offset of the cage
+				
+		newBot.getLeftMotor().rotate(nav.convertDistance(WHEELRADIUS, 10.0), true);
+		newBot.getRightMotor().rotate(nav.convertDistance(WHEELRADIUS, 10.0), false);
+		
+		//open the door
+		gateMotor.rotate(32);
+		
+		
+		//set this up tomorrow
+		//navigate away to drop off the bricks
+		newBot.getLeftMotor().rotate(nav.convertDistance(WHEELRADIUS, 20.0), true);
+		newBot.getRightMotor().rotate(nav.convertDistance(WHEELRADIUS, 20.0), false);
 		
 	}
 

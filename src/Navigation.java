@@ -31,6 +31,7 @@ public class Navigation {
 	private int threshold = 15;
 	private Wrangler pathF;
 	private Detection detector;
+	private Stack<Point>  emptyStack = new Stack<Point>();
 	// Navigation constructor
 	/**
 	 * 
@@ -122,7 +123,7 @@ public class Navigation {
 		// forward in the heading's direction
 
 		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 3.0 
-				|| localizing && this.pathF.insideGreenZone(this.odo.getX(), this.odo.getY())) {
+				/*|| (localizing && this.pathF.insideGreenZone(this.odo.getX(), this.odo.getY()))*/) {
 			// 15 cms before reaching its destination and if the angle Theta of the odometer is off, recalculate the heading and
 			// change the direction of the odometer.
 			//correct the first if
@@ -141,6 +142,8 @@ public class Navigation {
 				// IF we are more than 5 degrees off course, stop and turnTo
 				// correct.
 				if (angleDiff(this.odo.getAng(), Math.toDegrees(heading)) > 5) {
+					//LCD.clear(3);
+					//LCD.drawInt((int)angleDiff(this.odo.getAng(), Math.toDegrees(heading)), 0, 3);
 					this.robot.stop(0);
 					turnTo(heading);
 				}
@@ -171,24 +174,37 @@ public class Navigation {
 					newP = Point.rightAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
 				}
-				inputStack.pop();
-				this.pathF.generatePath(false, backPedalStack.peek().x, backPedalStack.peek().y, inputStack.peek().x, inputStack.peek().y, inputStack);
-				inputStack.push(backPedalStack.pop());
-				inputStack.push(backPedalStack.pop());
+					inputStack.pop();
+				this.pathF.generatePath(false, backPedalStack.peek().x,
+						backPedalStack.peek().y, inputStack.peek().x,
+						inputStack.peek().y, inputStack);
+					inputStack.push(backPedalStack.pop());
+					inputStack.push(backPedalStack.pop());
 				break;
 			}
 		}
+		
+		this.robot.stop(0);
 		if (!localizing && this.detector.hasThreeBlocks()){
 			this.detector.resetNumberOfBlocks();
 			inputStack.clear();
+			backPedalStack.clear();
+			
+			inputStack.push(new Point(this.pathF.getFinishX(), this.pathF.getFinishY(), false));
+			inputStack.push(new Point(this.pathF.getFinishX(), this.pathF.getFinishY(), false));
+			
 			//Localizing is true so that it ignores block avoidance and avoids an infinite loop
-			travelTo(true, this.pathF.getFinishX()*30.48, this.pathF.getFinishY()*30.48, 15, inputStack, backPedalStack);
+			//travelTo(true, this.pathF.getFinishX()*30.48, this.pathF.getFinishY()*30.48, 15, emptyStack, emptyStack);
+			this.robot.stop(0);
+			
 			//this.pathF.generatePath(true, backPedalStack.peek().x, backPedalStack.peek().y, this.pathF.getFinishX(), this.pathF.getFinishY(), inputStack);
 		}
 		//Sound.beep();
+		
 		LCD.drawString("Exited the loop", 0, 3);
+		LCD.clear(3);
 		// When it exits the loop, STOP
-		this.robot.stop(0);
+		
 		// 1 second cat-nap
 		
 		// sets navigation to false when it gets to destination
@@ -271,7 +287,7 @@ public class Navigation {
 	 * @param distance
 	 * @return
 	 */
-	private static int convertDistance(double radius, double distance) {
+	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 

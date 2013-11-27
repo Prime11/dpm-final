@@ -18,7 +18,7 @@ public class Wrangler {
 	private double startX, startY;
 	private int widthX, widthY;
 	private Stack<Point> currentStack = new Stack<Point>();
-	private Stack<Point> backPedalStack = new Stack<Point>();
+	public Stack<Point> backPedalStack = new Stack<Point>();
 	private Navigation navi;
 	private LightLocalizer localizer;
 	private UltraSensor ultra;

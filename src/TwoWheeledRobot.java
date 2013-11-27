@@ -149,10 +149,12 @@ public class TwoWheeledRobot {
 	 * @param f
 	 */
 	public void stop(int f) {
-		//leftMotor.setAcceleration(1000);
-		//rightMotor.setAcceleration(1000);
+		leftMotor.setAcceleration(1000);
+		rightMotor.setAcceleration(1000);
 		leftMotor.stop(true);
 		rightMotor.stop(false);
+		leftMotor.setAcceleration(500);
+		rightMotor.setAcceleration(500);
 	}
 
 	// Added two methods to rotate the robot either Clockwise or CountClockwise
