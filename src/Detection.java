@@ -42,7 +42,7 @@ public class Detection extends Thread {
 	}
 	
 	public boolean hasThreeBlocks() {
-		if (numberOfBlocks >= 2) {
+		if (numberOfBlocks >= 1) {
 			return true; 
 		}
 		return false; 

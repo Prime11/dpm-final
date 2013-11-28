@@ -19,13 +19,14 @@ public class Startup {
 	//And the door must be opened enouhg so that the black peice does not interfere with the blocks when dropping them off
 	
 	
-	/**
+	/** Main Program run
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
 		//Set if it uses Bluetooth Program
+		//TODO: Set to true
 		boolean useBluetooth = true;
 		
 		double finalX = 6, finalY = 7;
@@ -82,6 +83,7 @@ public class Startup {
 		}
 
 		LCD.clear();
+		//TODO: Comment this code
 		//Button.waitForAnyPress();
 
 		TwoWheeledRobot newBot = new TwoWheeledRobot(Motor.A, Motor.B);
@@ -109,17 +111,20 @@ public class Startup {
 
 		//new object detection class to fit our robot
 		// initiate the localization object and perform the localization.
-		USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE); 
+		USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE);
+		//TODO: Uncomment here
 		usl.doLocalization();
 	
 		UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltraSensor usd = new UltraSensor(us2);
+		//TODO: Uncomment here
 		usd.start();
 		
 		Navigation nav = new Navigation(odometer, usd);
 		newBot.getLeftMotor().rotate(-nav.convertAngle(Startup.WHEELRADIUS, Startup.WHEELWIDTH, 60), true);
 		newBot.getRightMotor().rotate(nav.convertAngle(Startup.WHEELRADIUS, Startup.WHEELWIDTH, 60.0), false);
 		LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
+		//TODO: Uncomment here
 		lsl.doLocalization();
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
 		
@@ -150,9 +155,11 @@ public class Startup {
 		pathfinder.createDangerList();
 		pathfinder.backPedalStack.push(new Point(startX, startY, false));
 		pathfinder.generateSetPath();
+		//TODO: Uncomment here
 		pathfinder.runSimpleCourse();
 		
 		//the 2 rotates below are to get the blocks into the safe zone due to the offset of the cage
+		//TODO Uncomment here  
 				
 		newBot.getLeftMotor().rotate(nav.convertDistance(WHEELRADIUS, 10.0), true);
 		newBot.getRightMotor().rotate(nav.convertDistance(WHEELRADIUS, 10.0), false);

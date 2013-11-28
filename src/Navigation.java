@@ -164,22 +164,47 @@ public class Navigation {
 				if (this.odo.getAng() < 10 || this.odo.getAng() > 350){
 					newP = Point.downAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
+					inputStack.pop();
+					inputStack.push(Point.upAdjacentPoint(Point.upAdjacentPoint(backPedalStack.peek())));
+					inputStack.push(Point.upAdjacentPoint(Point.upAdjacentPoint(Point.rightAdjacentPoint(backPedalStack.peek()))));
+					inputStack.push(Point.rightAdjacentPoint(backPedalStack.peek()));
 				} else if (this.odo.getAng() > 80 || this.odo.getAng() < 100){
 					newP = Point.leftAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
+					inputStack.pop();
+					inputStack.push(Point.rightAdjacentPoint(Point.rightAdjacentPoint(backPedalStack.peek())));
+					inputStack.push(Point.rightAdjacentPoint(Point.rightAdjacentPoint(Point.upAdjacentPoint(backPedalStack.peek()))));
+					inputStack.push(Point.upAdjacentPoint(backPedalStack.peek()));
 				} else if (this.odo.getAng() > 170 || this.odo.getAng() < 190){
 					newP = Point.upAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
+					inputStack.pop();
+					inputStack.push(Point.downAdjacentPoint(Point.downAdjacentPoint(backPedalStack.peek())));
+					inputStack.push(Point.downAdjacentPoint(Point.downAdjacentPoint(Point.leftAdjacentPoint(backPedalStack.peek()))));
+					inputStack.push(Point.leftAdjacentPoint(backPedalStack.peek()));
 				} else if (this.odo.getAng() > 260 || this.odo.getAng() < 280){
 					newP = Point.rightAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
-				}
 					inputStack.pop();
+					inputStack.push(Point.leftAdjacentPoint(Point.leftAdjacentPoint(backPedalStack.peek())));
+					inputStack.push(Point.leftAdjacentPoint(Point.leftAdjacentPoint(Point.downAdjacentPoint(backPedalStack.peek()))));
+					inputStack.push(Point.downAdjacentPoint(backPedalStack.peek()));
+				}
+				else {
+					//newP = Point.rightAdjacentPoint(inputStack.peek());
+					//this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
+					//inputStack.pop();
+					inputStack.push(Point.leftAdjacentPoint(Point.leftAdjacentPoint(backPedalStack.peek())));
+					inputStack.push(Point.leftAdjacentPoint(Point.leftAdjacentPoint(Point.downAdjacentPoint(backPedalStack.peek()))));
+					inputStack.push(new Point(backPedalStack.peek().x - 30.48*Math.cos(Math.toRadians(this.odo.getAng())), backPedalStack.peek().y + 30.48*Math.sin(Math.toRadians(this.odo.getAng())), false));
+					inputStack.push(new Point(backPedalStack.peek().x + 0, backPedalStack.peek().y + 2*30.48*Math.cos(Math.toRadians(this.odo.getAng())), false));
+					inputStack.push(new Point(backPedalStack.peek().x + 30.48*Math.sin(Math.toRadians(this.odo.getAng())), backPedalStack.peek().y + 30.48*Math.cos(Math.toRadians(this.odo.getAng())), false));
+				}
 				this.pathF.generatePath(false, backPedalStack.peek().x,
 						backPedalStack.peek().y, inputStack.peek().x,
 						inputStack.peek().y, inputStack);
-					inputStack.push(backPedalStack.pop());
-					inputStack.push(backPedalStack.pop());
+				inputStack.push(backPedalStack.peek());
+				inputStack.push(backPedalStack.pop());
 				break;
 			}
 		}
