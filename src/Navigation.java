@@ -122,8 +122,7 @@ public class Navigation {
 		// Until the robot is at its destination within 1 cm, it will move
 		// forward in the heading's direction
 
-		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 3.0 
-				/*|| (localizing && this.pathF.insideGreenZone(this.odo.getX(), this.odo.getY()))*/) {
+		while (Math.sqrt(Math.pow(x - this.odo.getX(),2) + Math.pow(y - this.odo.getY(), 2)) >= 3.0 ) {
 			// 15 cms before reaching its destination and if the angle Theta of the odometer is off, recalculate the heading and
 			// change the direction of the odometer.
 			//correct the first if
@@ -153,14 +152,18 @@ public class Navigation {
 			if (localizing || odo.isPaused() == false && uSonic.getDist() > this.threshold) {
 				LCD.clear(4);
 				LCD.drawInt(uSonic.getDist(), 0, 4);
+				//forces robot forward while it hasn't arrived at its destination
 				this.robot.getLeftMotor().setSpeed(300);
 				this.robot.getRightMotor().setSpeed(300);
 				this.robot.getLeftMotor().forward();
 				this.robot.getRightMotor().forward();
 			}
+			//While the robot isn't localizing + if it detects a wooden block in front of it
 			else if (!localizing && uSonic.getDist() <= this.threshold){
 				this.robot.stop(0);
 				Point newP = new Point();
+				//Depending on its direction of travel, input points to travel to into stack
+				//it will avoid the block while following these blocks.
 				if (this.odo.getAng() < 10 || this.odo.getAng() > 350){
 					newP = Point.downAdjacentPoint(inputStack.peek());
 					this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
@@ -191,15 +194,13 @@ public class Navigation {
 					inputStack.push(Point.downAdjacentPoint(backPedalStack.peek()));
 				}
 				else {
-					//newP = Point.rightAdjacentPoint(inputStack.peek());
-					//this.pathF.insertIntoDangerList(inputStack.peek().x, inputStack.peek().y, newP.x, newP.y);
-					//inputStack.pop();
 					inputStack.push(Point.leftAdjacentPoint(Point.leftAdjacentPoint(backPedalStack.peek())));
 					inputStack.push(Point.leftAdjacentPoint(Point.leftAdjacentPoint(Point.downAdjacentPoint(backPedalStack.peek()))));
 					inputStack.push(new Point(backPedalStack.peek().x - 30.48*Math.cos(Math.toRadians(this.odo.getAng())), backPedalStack.peek().y + 30.48*Math.sin(Math.toRadians(this.odo.getAng())), false));
 					inputStack.push(new Point(backPedalStack.peek().x + 0, backPedalStack.peek().y + 2*30.48*Math.cos(Math.toRadians(this.odo.getAng())), false));
 					inputStack.push(new Point(backPedalStack.peek().x + 30.48*Math.sin(Math.toRadians(this.odo.getAng())), backPedalStack.peek().y + 30.48*Math.cos(Math.toRadians(this.odo.getAng())), false));
 				}
+				//Generates a path to the previous point in backpedalStack.
 				this.pathF.generatePath(false, backPedalStack.peek().x,
 						backPedalStack.peek().y, inputStack.peek().x,
 						inputStack.peek().y, inputStack);
