@@ -34,14 +34,14 @@ public class Startup {
 		double startX = 0, startY = 0;
 		int startID = 1;
 		double redX1 = 0, redY1 = 7, redX2 = 8, redY2 = 8;
-		//TODO: GreenZone avoidance
+		//Sets green zone for avoidance and final travel
 		double greenX1 = 2, greenY1 = 2, greenX2 = 3, greenY2 = 3;
-		//Before it localizes
+		//Wheel radius and robot witdh for navigation and localization
 		double robotWheelRadii = Startup.WHEELRADIUS, robotWidth= Startup.WHEELWIDTH;
-		//After it localizes
 		double robotWheelRadiiSecond = Startup.WHEELRADIUS, robotWidthSecond = Startup.WHEELWIDTH;
 		//Size of the field
 		int widthX = 10, widthY = 10;
+		// update array for odometer
 		boolean [] update = {true, true, true};
 		
 		if (useBluetooth) {
@@ -49,7 +49,7 @@ public class Startup {
 			int dangerZ[];
 			int role;
 			int startingCorner;
-			//TODO Set ODOMETER For Starting Corner
+			// Gets information from bluetooth transmission and sets it into proper variables
 			bluetooth.BluetoothConnection blue = new bluetooth.BluetoothConnection();
 			startID = blue.getTransmission().startingCorner.getId();
 			startX = blue.getTransmission().startingCorner.getX();
@@ -68,7 +68,9 @@ public class Startup {
 				dangerZ = new int[4];
 			}
 			
+			//Prints onto screen its actual role
 			LCD.drawString("I'm a " + PlayerRole.lookupRole(role) + "!", 5, 0);
+			//Sets up variables
 			Sound.systemSound(false, 2);
 			greenX1 = safeZ[0];
 			greenY1 = safeZ[1];
@@ -83,14 +85,11 @@ public class Startup {
 		}
 
 		LCD.clear();
-		//TODO: Comment this code
-		//Button.waitForAnyPress();
-
+		//initiates TwoWheeledRobot and gate motor
 		TwoWheeledRobot newBot = new TwoWheeledRobot(Motor.A, Motor.B);
+		//sets robot size
 		newBot.setRobotParts(robotWheelRadii, robotWidth);
 		NXTRegulatedMotor gateMotor = Motor.C;
-		// Retrieve the bluetooth signal and identify if the robot will be a
-		// builder or a garbage collector
 
 		// initiate the two sensors that will be taken in as input for the
 		// odometry correction
@@ -112,55 +111,57 @@ public class Startup {
 		//new object detection class to fit our robot
 		// initiate the localization object and perform the localization.
 		USLocalizer usl = new USLocalizer(odometer, us, USLocalizer.LocalizationType.FALLING_EDGE);
-		//TODO: Uncomment here
 		usl.doLocalization();
-	
+		
+		//initiates ultrasonic sensor for Initial Navigation
 		UltrasonicSensor us2 = new UltrasonicSensor(SensorPort.S3);
 		UltraSensor usd = new UltraSensor(us2);
-		//TODO: Uncomment here
 		usd.start();
-		
+				
 		Navigation nav = new Navigation(odometer, usd);
+		//Rotates an extra 60 degrees
 		newBot.getLeftMotor().rotate(-nav.convertAngle(Startup.WHEELRADIUS, Startup.WHEELWIDTH, 60), true);
 		newBot.getRightMotor().rotate(nav.convertAngle(Startup.WHEELRADIUS, Startup.WHEELWIDTH, 60.0), false);
+		//Initiates and performs light localization
 		LightLocalizer lsl = new LightLocalizer(odometer, leftLS, rightLS, nav);
-		//TODO: Uncomment here
 		lsl.doLocalization();
+		
+		//Sets initial position for robot before path generation
 		odometer.setPosition(computePosition(startID, (int) widthX+2), update);
 		
 		//code for opening gate motor
 		//this first rotation to be done right after localization
 		gateMotor.rotate(22);
 		
-		
+		//Sets robot size
 		newBot.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
 		odometer.setRobotParts(robotWheelRadiiSecond, robotWidthSecond);
 		
-		//set the current position of the robot
-		
-		//the final updated position of the odometer with respect to the initial starting tile
+		//Initiates object detection
 		Detection detect = new Detection(detectionLS);
 		detect.start();
+		
+		//Initiates pathfinding class (Read WRANGLER)
+		//It was a jeep joke, sue me.
 		Wrangler pathfinder = new Wrangler(odometer, newBot, detect, usd, gateMotor);
 	
-		//pathfinder.setFinal(finalX, finalY);
+		//Sets initial variables for path generation in pathfinding class
 		pathfinder.setArenaSize(widthX, widthY);
 		pathfinder.setStarter(startX, startY);
 		pathfinder.setRedZone(redX1, redY1, redX2, redY2);
-		
-		
 		pathfinder.setGreenZone(greenX1, greenY1, greenX2, greenY2);
 		pathfinder.insertCornersIntoRedZone(startID);
 		pathfinder.setGreenMid();
+		//Creates redzone list for redzone avoidance
 		pathfinder.createDangerList();
+		//Pushes first coordinate into backpedalling stack
 		pathfinder.backPedalStack.push(new Point(startX, startY, false));
+		//Generates the set path
 		pathfinder.generateSetPath();
-		//TODO: Uncomment here
+		//runs the course
 		pathfinder.runSimpleCourse();
 		
 		//the 2 rotates below are to get the blocks into the safe zone due to the offset of the cage
-		//TODO Uncomment here  
-				
 		newBot.getLeftMotor().rotate(nav.convertDistance(WHEELRADIUS, 10.0), true);
 		newBot.getRightMotor().rotate(nav.convertDistance(WHEELRADIUS, 10.0), false);
 		
@@ -168,7 +169,6 @@ public class Startup {
 		gateMotor.rotate(32);
 		
 		
-		//set this up tomorrow
 		//navigate away to drop off the bricks
 		newBot.getLeftMotor().rotate(nav.convertDistance(WHEELRADIUS, 20.0), true);
 		newBot.getRightMotor().rotate(nav.convertDistance(WHEELRADIUS, 20.0), false);
@@ -176,8 +176,8 @@ public class Startup {
 	}
 
 	// the assumption is that the field will be a square
-	/**
-	 * ComputePosition
+	/** ComputePosition: Computes the initial position of the robot based on the gridsize and 
+	 *  Initial position ID given from bluetooth.
 	 * @param tile
 	 * @param gridsize
 	 * @return
