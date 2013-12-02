@@ -204,7 +204,10 @@ public class Wrangler {
 			}
 		}
 	}
-
+	/** Returns true if robot is inside the greenzone
+	 * @param x
+	 * @param y 
+	 */
 	public boolean insideGreenZone(double x, double y){
 		if (x > this.greenX1*30.48 && x < this.greenX2*30.48 && y> this.greenY1*30.48 && y < this.greenY2*30.48){
 			return true;
@@ -224,6 +227,7 @@ public class Wrangler {
 	private boolean isDangerous(Point currentPoint) {
 		ListIterator<Point> iter = this.dangerPointsL.listIterator();
 		Point nextPoint;
+		//Iterates through dangerList until it finds that specific point to return true or false
 		while (iter.hasNext()) {
 			nextPoint = iter.next();
 			if (Point.areSamePoints(currentPoint, nextPoint)) {
@@ -246,6 +250,8 @@ public class Wrangler {
 		} else {
 			i = 1;
 		}
+		// pushes points in reverse order from the opposite corner into the robot in an s pattern 
+		// while ignoring redzones
 		while (tempY >= 0) {
 			if (i % 2 == 0) {
 				for (int j = (int) this.widthX; j >= 0; j--) {
@@ -283,6 +289,8 @@ public class Wrangler {
 		double displacementX = (endPointX - currentX);
 		double displacementY = (endPointY - currentY);
 		Point endPoint = new Point(endPointX, endPointY, false);
+		//Similar to generatePath except it refuses to perform path generation if the point is dangerous
+		// Creates a step-ladder path to the finish point
 		if (!isDangerous(endPoint)) {
 			boolean doneX = false, doneY = false;
 			while (!doneX && !doneY) {
