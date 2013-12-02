@@ -10,11 +10,17 @@ public class Detection extends Thread {
 	private int numberOfBlocks = 0; 
 	final ColorSensor blockDetector;
 	
+	/** Detection constructor
+	 * 
+	 */
 	public Detection(ColorSensor colorSensor) {
 		this.blockDetector = colorSensor;
 		this.blockDetector.setFloodlight(Color.BLUE);
 	}
-	
+	/** Starts a new thread that increases the count of blocks everytime the threshold of the colorsensor gets
+	 * passed
+	 * 
+	 */
 	public void run() {
 		int a = 0;
 		while (!hasThreeBlocks()) {
@@ -22,26 +28,23 @@ public class Detection extends Thread {
 			LCD.clear(3);
 			LCD.drawInt(a, 0, 3);
 			if(a > 278){
+				//beeps twice and increments the numberOfBlocks
 				Sound.twoBeeps();
 				numberOfBlocks++;
 				try {
+					//Sleeps for 3 seconds after each increment to avoid double incrementation
 					Thread.sleep(3000);
+					
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			
-			/*
-			 * if (a > COLOR_THRESHOLD) { //Sound.buzz(); if (b - a > 25 && b -
-			 * a < 40) { // if there is a block in front // of the color sensor
-			 * b = a; numberOfBlocks++; Sound.setVolume(Sound.VOL_MAX);
-			 * Sound.twoBeeps(); } } b = a;
-			 */
-		}
+		}			
 	}
 	
 	public boolean hasThreeBlocks() {
+		//returns true if there is more than 1 block in the stack
 		if (numberOfBlocks >= 1) {
 			return true; 
 		}
@@ -49,6 +52,7 @@ public class Detection extends Thread {
 	}
 
 	public void resetNumberOfBlocks() {
+		//resets the number of blocks to 1
 		numberOfBlocks = 0; 
 	}
 }
