@@ -33,7 +33,7 @@ public class Point {
 	}
 
 	/**
-	 * Returns if point is outOfBounds
+	 * Returns false if point is outOfBounds
 	 * 
 	 * @param widthX
 	 * @param widthY
